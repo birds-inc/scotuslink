@@ -1,0 +1,127 @@
+Parameters:
+  EnvironmentParameter:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prod
+
+Resources:
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join ["-", ["LambdaExecutionRole", !Ref EnvironmentParameter]]
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: "CloudwatchLogging"
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: "logs:CreateLogGroup"
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "*"
+
+  RedirectLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Join ["-", ["redirect-lambda", !Ref EnvironmentParameter]]
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: "nodejs8.10"
+      Code:
+        ZipFile: !Sub |
+            'use strict';
+
+            // http://blog.ryangreen.ca/2016/01/04/how-to-http-redirects-with-api-gateway-and-lambda/
+             
+            exports.handler = function(event, context) {
+                const URL_TEMPLATE = "https://cdn.loc.gov/service/ll/usrep/usrep{{volume}}/usrep{{volume}}{{page}}/usrep{{volume}}{{page}}.pdf";
+                var volume = event['volume'];
+                var page = event['page'];
+                var url = URL_TEMPLATE.replace(/{{volume}}/g, volume).replace(/{{page}}/g, page);
+                
+                console.log( "redirecting to " + url);
+                context.succeed({
+                    location: url
+                });
+            };
+
+  RedirectAPI:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Join ["-", ["RedirectAPI", !Ref EnvironmentParameter]]
+      FailOnWarnings: true
+      Body:
+        openapi: 3.0.1
+        info:
+          title: Redirect API
+          description: URL redirect for Supreme Court opinions
+          version: 0.0.1
+          contact:
+            name: Alex Gallichotte
+          license:
+            name: TBD
+            url: TBD
+        paths:
+          /{volume}/{page}:
+            get:
+              parameters:
+                - name: volume
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: page
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+              responses:
+                "200":
+                  description: "200 response"
+                  headers: {}
+                "302":
+                  description: "302 response"
+                  headers:
+                    Location:
+                      schema:
+                        type: string
+              x-amazon-apigateway-integration:
+                uri: !Join ["/", ["arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions", !GetAtt RedirectLambda.Arn, "invocations"]]
+                responses:
+                  default:
+                    statusCode: "302"
+                    responseParameters:
+                      method.response.header.Location: "integration.response.body.location"
+                passthroughBehavior: "when_no_match"
+                httpMethod: "POST"
+                requestTemplates:
+                  application/json: "{\"volume\": \"$input.params('volume')\", \"page\": \"$input.params('page')\"}"
+                type: "aws"
+
+  RedirectLambdaPermission:
+    Type:  AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt RedirectLambda.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RedirectAPI}/*"
+
+  RedirectAPIDeployment:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref RedirectAPI
+      StageName: api
