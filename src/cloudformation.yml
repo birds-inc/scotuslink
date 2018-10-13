@@ -76,6 +76,23 @@ Resources:
             name: TBD
             url: TBD
         paths:
+          /:
+            get:
+              responses:
+                "200":
+                  description: "200 response"
+                  content:
+                    text/html:
+                      schema:
+                        type: string
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                httpMethod: "POST"
+                responseTemplates:
+                  text/html: "<title>scotuslink.com</title><h1>Supreme Court Opinion URL Shortener</h1><p>Volume: <input id=v value=542> Page: <input id=p value=692></p><a href=https://scotuslink.com/542/692 id=l target=_blank><h2 id=t>https://scotuslink.com/542/692</h2></a><script src=https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js></script><script>$(\"input\").change(function(){var t=\"https://scotuslink.com/\"+$(\"#v\").val()+\"/\"+$(\"#p\").val();$(\"#t\").html(t),$(\"#l\").attr(\"href\",t)})</script>"
+                type: "aws"
           /{volume}/{page}:
             get:
               parameters:
