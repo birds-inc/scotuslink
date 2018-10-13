@@ -1,0 +1,20 @@
+<html>
+<head>
+<title>suprm.co</title>
+</head>
+<body>
+<h1>Supreme Court Opinion URL Shortener</h1>
+<p>Volume: <input id="v" value="542"/> Page: <input id="p" value="692"/></p>
+<a id="l" href="https://suprm.co/542/692" target="_blank"><h2 id="t">https://suprm.co/542/692</h2></a>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+$("input").change(function () {
+  var v = $("#v").val();
+  var p = $("#p").val();
+  var link = "https://suprm.co/" + v + "/" + p;
+  $("#t").html(link);
+  $("#l").attr("href", link);
+});
+</script>
+</body>
+</html>
