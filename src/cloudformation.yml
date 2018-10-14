@@ -75,6 +75,10 @@ Resources:
           license:
             name: TBD
             url: TBD
+        components:
+          schemas:
+            Empty:
+              type: "object"
         paths:
           /:
             get:
@@ -84,15 +88,18 @@ Resources:
                   content:
                     text/html:
                       schema:
-                        type: string
+                        $ref: "#/components/schemas/Empty"
               x-amazon-apigateway-integration:
+                type: "mock"
                 responses:
                   default:
                     statusCode: "200"
-                httpMethod: "POST"
-                responseTemplates:
-                  text/html: "<title>scotuslink.com</title><h1>Supreme Court Opinion URL Shortener</h1><p>Volume: <input id=v value=542> Page: <input id=p value=692></p><a href=https://scotuslink.com/542/692 id=l target=_blank><h2 id=t>https://scotuslink.com/542/692</h2></a><script src=https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js></script><script>$(\"input\").change(function(){var t=\"https://scotuslink.com/\"+$(\"#v\").val()+\"/\"+$(\"#p\").val();$(\"#t\").html(t),$(\"#l\").attr(\"href\",t)})</script>"
-                type: "aws"
+                    responseTemplates:
+                      text/html: "<title>scotuslink.com</title><h1>Supreme Court Opinion URL Shortener</h1><p>Volume: <input id=v value=542> Page: <input id=p value=692></p><a href=https://scotuslink.com/542/692 id=l target=_blank><h2 id=t>https://scotuslink.com/542/692</h2></a><script src=https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js></script><script>$(\"input\").change(function(){var t=\"https://scotuslink.com/\"+$(\"#v\").val()+\"/\"+$(\"#p\").val();$(\"#t\").html(t),$(\"#l\").attr(\"href\",t)})</script>"
+                requestTemplates:
+                  application/json: "{\"statusCode\": 200}"
+                passthroughBehavior: "when_no_match"
+
           /{volume}/{page}:
             get:
               parameters:
@@ -117,6 +124,7 @@ Resources:
                       schema:
                         type: string
               x-amazon-apigateway-integration:
+                type: "aws"
                 uri: !Join ["/", ["arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions", !GetAtt RedirectLambda.Arn, "invocations"]]
                 responses:
                   default:
@@ -127,7 +135,7 @@ Resources:
                 httpMethod: "POST"
                 requestTemplates:
                   application/json: "{\"volume\": \"$input.params('volume')\", \"page\": \"$input.params('page')\"}"
-                type: "aws"
+
 
   RedirectLambdaPermission:
     Type:  AWS::Lambda::Permission
