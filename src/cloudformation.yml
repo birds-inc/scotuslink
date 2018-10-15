@@ -6,7 +6,23 @@ Parameters:
       - dev
       - prod
 
+  CertificateArnParameter:
+    Type: String
+    Default: arn:aws:acm:us-east-1:758881537981:certificate/dc6174a9-ef18-43b3-8b18-c252284d0891
+
+Mappings:
+  URLMap:
+    dev:
+      URL: dev.scotuslink.com
+      Zone: dev.scotuslink.com.
+      Edge: d1tkp7wrgzbag4.cloudfront.net
+    prod:
+      URL: scotuslink.com
+      Zone: scotuslink.com.
+      Edge: d8rqxfm44ppdi.cloudfront.net
+
 Resources:
+  # code
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -59,6 +75,7 @@ Resources:
                 });
             };
 
+  # api
   RedirectAPI:
     Type: AWS::ApiGateway::RestApi
     Properties:
@@ -136,7 +153,6 @@ Resources:
                 requestTemplates:
                   application/json: "{\"volume\": \"$input.params('volume')\", \"page\": \"$input.params('page')\"}"
 
-
   RedirectLambdaPermission:
     Type:  AWS::Lambda::Permission
     Properties:
@@ -150,3 +166,34 @@ Resources:
     Properties:
       RestApiId: !Ref RedirectAPI
       StageName: api
+
+  # dns
+  APIDomainName:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      DomainName: !FindInMap [URLMap, !Ref EnvironmentParameter, URL]
+      CertificateArn: !Ref CertificateArnParameter
+
+  APIMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+      DomainName: !FindInMap [URLMap, !Ref EnvironmentParameter, URL]
+      RestApiId: !Ref RedirectAPI
+      Stage: api
+
+  DNSHostedZone:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      Name: !FindInMap [URLMap, !Ref EnvironmentParameter, URL]
+  
+  DNSRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        # us-east-1 https://docs.aws.amazon.com/general/latest/gr/rande.html#apigateway_region
+        HostedZoneId: Z2FDTNDATAQYW2
+        DNSName: !FindInMap [URLMap, !Ref EnvironmentParameter, Edge]
+      HostedZoneName: !FindInMap [URLMap, !Ref EnvironmentParameter, Zone]
+      Name: !FindInMap [URLMap, !Ref EnvironmentParameter, URL]
+      Type: A
+
