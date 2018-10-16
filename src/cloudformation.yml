@@ -10,15 +10,17 @@ Parameters:
     Type: String
     Default: arn:aws:acm:us-east-1:758881537981:certificate/dc6174a9-ef18-43b3-8b18-c252284d0891
 
+  HostedZoneParameter:
+    Type: String
+    Default: scotuslink.com.
+
 Mappings:
   URLMap:
     dev:
       URL: dev.scotuslink.com
-      Zone: dev.scotuslink.com.
       Edge: d1tkp7wrgzbag4.cloudfront.net
     prod:
       URL: scotuslink.com
-      Zone: scotuslink.com.
       Edge: d8rqxfm44ppdi.cloudfront.net
 
 Resources:
@@ -181,11 +183,6 @@ Resources:
       RestApiId: !Ref RedirectAPI
       Stage: api
 
-  DNSHostedZone:
-    Type: AWS::Route53::HostedZone
-    Properties:
-      Name: !FindInMap [URLMap, !Ref EnvironmentParameter, URL]
-  
   DNSRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
@@ -193,7 +190,7 @@ Resources:
         # us-east-1 https://docs.aws.amazon.com/general/latest/gr/rande.html#apigateway_region
         HostedZoneId: Z2FDTNDATAQYW2
         DNSName: !FindInMap [URLMap, !Ref EnvironmentParameter, Edge]
-      HostedZoneName: !FindInMap [URLMap, !Ref EnvironmentParameter, Zone]
+      HostedZoneName: !Ref HostedZoneParameter
       Name: !FindInMap [URLMap, !Ref EnvironmentParameter, URL]
       Type: A
 
