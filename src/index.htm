@@ -4,14 +4,20 @@
 </head>
 <body>
 <h1>Supreme Court Opinion URL Shortener</h1>
-<p>Volume: <input id="v" value="542" maxlength="3"/> Page: <input id="p" value="692" maxlength="3"/></p>
+<p>
+Volume: <input id="v" placeholder="542" maxlength="3"/>
+Page: <input id="p" placeholder="692" maxlength="3"/>
+PDF Page (optional): <input id="pp" placeholder="1" />
+</p>
 <a id="l" href="https://scotuslink.com/542/692" target="_blank"><h2 id="t">https://scotuslink.com/542/692</h2></a>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script>
 $("input").keyup(function () {
   var v = $("#v").val();
   var p = $("#p").val();
+  var pp = $("#pp").val();
   var link = "https://scotuslink.com/" + v + "/" + p;
+  if (pp) link += "/" + pp;
   $("#t").html(link);
   $("#l").attr("href", link);
 });

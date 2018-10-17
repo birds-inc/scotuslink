@@ -63,12 +63,18 @@ Resources:
         ZipFile: !Sub |
             'use strict';
 
+            const URL_TEMPLATE = "https://cdn.loc.gov/service/ll/usrep/usrep{{volume}}/usrep{{volume}}{{page}}/usrep{{volume}}{{page}}.pdf";
+            const PAGE_URL_TEMPLATE = "https://cdn.loc.gov/service/ll/usrep/usrep{{volume}}/usrep{{volume}}{{page}}/usrep{{volume}}{{page}}.pdf#page={{pdfpage}}";
+
             // http://blog.ryangreen.ca/2016/01/04/how-to-http-redirects-with-api-gateway-and-lambda/
             exports.handler = function(event, context) {
-                const URL_TEMPLATE = "https://cdn.loc.gov/service/ll/usrep/usrep{{volume}}/usrep{{volume}}{{page}}/usrep{{volume}}{{page}}.pdf";
                 var volume = pad(event['volume'], 3);
                 var page = pad(event['page'], 3);
-                var url = URL_TEMPLATE.replace(/{{volume}}/g, volume).replace(/{{page}}/g, page);
+                var pdfpage = event['pdfpage'];
+
+                var template = pdfpage ? PAGE_URL_TEMPLATE : URL_TEMPLATE;
+
+                var url = template.replace(/{{volume}}/g, volume).replace(/{{page}}/g, page).replace(/{{pdfpage}}/g, pdfpage);
                 
                 console.log( "redirecting to " + url);
                 context.succeed({
@@ -117,7 +123,9 @@ Resources:
                   default:
                     statusCode: "200"
                     responseTemplates:
-                      text/html: "<title>scotuslink.com</title><h1>Supreme Court Opinion URL Shortener</h1><p>Volume: <input id=v maxlength=3 value=542> Page: <input id=p maxlength=3 value=692></p><a href=https://scotuslink.com/542/692 id=l target=_blank><h2 id=t>https://scotuslink.com/542/692</h2></a><script src=https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js></script><script>$(\"input\").keyup(function(){var t=\"https://scotuslink.com/\"+$(\"#v\").val()+\"/\"+$(\"#p\").val();$(\"#t\").html(t),$(\"#l\").attr(\"href\",t)}),$(document).ready(function(){$(\"input\").keyup(function(){this.value.length==$(this).attr(\"maxlength\")&&$(this).next().focus()})})</script>"
+                      text/html: !Sub
+                        - "<title>${url}</title><h1>Supreme Court Opinion URL Shortener</h1><p>Volume: <input id=v placeholder=542 maxlength=3> Page: <input id=p placeholder=692 maxlength=3> PDF Page (optional): <input id=pp placeholder=1></p><a href=https://${url}/542/692 id=l target=_blank><h2 id=t>https://${url}/542/692</h2></a><script src=https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js></script><script>$(\"input\").keyup(function(){var t=$(\"#v\").val(),n=$(\"#p\").val(),u=$(\"#pp\").val(),a=\"https://${url}/\"+t+\"/\"+n;u&&(a+=\"/\"+u),$(\"#t\").html(a),$(\"#l\").attr(\"href\",a)}),$(document).ready(function(){$(\"input\").keyup(function(){this.value.length==$(this).attr(\"maxlength\")&&$(this).next().focus()})})</script>"
+                        - { url: !FindInMap [URLMap, !Ref EnvironmentParameter, URL] }
                 requestTemplates:
                   application/json: "{\"statusCode\": 200}"
                 passthroughBehavior: "when_no_match"
@@ -157,6 +165,46 @@ Resources:
                 httpMethod: "POST"
                 requestTemplates:
                   application/json: "{\"volume\": \"$input.params('volume')\", \"page\": \"$input.params('page')\"}"
+          /{volume}/{page}/{pdfpage}:
+            get:
+              parameters:
+                - name: volume
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: page
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: pdfpage
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+              responses:
+                "200":
+                  description: "200 response"
+                  headers: {}
+                "302":
+                  description: "302 response"
+                  headers:
+                    Location:
+                      schema:
+                        type: string
+              x-amazon-apigateway-integration:
+                type: "aws"
+                uri: !Join ["/", ["arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions", !GetAtt RedirectLambda.Arn, "invocations"]]
+                responses:
+                  default:
+                    statusCode: "302"
+                    responseParameters:
+                      method.response.header.Location: "integration.response.body.location"
+                passthroughBehavior: "when_no_match"
+                httpMethod: "POST"
+                requestTemplates:
+                  application/json: "{\"volume\": \"$input.params('volume')\", \"page\": \"$input.params('page')\", \"pdfpage\": \"$input.params('pdfpage')\"}"
 
   RedirectLambdaPermission:
     Type:  AWS::Lambda::Permission
