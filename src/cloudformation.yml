@@ -64,11 +64,10 @@ Resources:
             'use strict';
 
             // http://blog.ryangreen.ca/2016/01/04/how-to-http-redirects-with-api-gateway-and-lambda/
-             
             exports.handler = function(event, context) {
                 const URL_TEMPLATE = "https://cdn.loc.gov/service/ll/usrep/usrep{{volume}}/usrep{{volume}}{{page}}/usrep{{volume}}{{page}}.pdf";
-                var volume = event['volume'];
-                var page = event['page'];
+                var volume = pad(event['volume'], 3);
+                var page = pad(event['page'], 3);
                 var url = URL_TEMPLATE.replace(/{{volume}}/g, volume).replace(/{{page}}/g, page);
                 
                 console.log( "redirecting to " + url);
@@ -76,6 +75,10 @@ Resources:
                     location: url
                 });
             };
+
+            function pad(n, width) {
+                return n.length >= width ? n : new Array(width - n.length + 1).join("0") + n;
+            }
 
   # api
   RedirectAPI:
