@@ -63,8 +63,12 @@ Resources:
         ZipFile: !Sub |
             'use strict';
 
-            const URL_TEMPLATE = "https://cdn.loc.gov/service/ll/usrep/usrep{{volume}}/usrep{{volume}}{{page}}/usrep{{volume}}{{page}}.pdf";
-            const PAGE_URL_TEMPLATE = "https://cdn.loc.gov/service/ll/usrep/usrep{{volume}}/usrep{{volume}}{{page}}/usrep{{volume}}{{page}}.pdf#page={{pdfpage}}";
+            const LOC_URL_TEMPLATE = "https://cdn.loc.gov/service/ll/usrep/usrep{{volume}}/usrep{{volume}}{{page}}/usrep{{volume}}{{page}}.pdf";
+            const LOC_PAGE_URL_TEMPLATE = "https://cdn.loc.gov/service/ll/usrep/usrep{{volume}}/usrep{{volume}}{{page}}/usrep{{volume}}{{page}}.pdf#page={{pdfpage}}";
+
+            const SC_URL_TEMPLATE = "https://www.supremecourt.gov/opinions/boundvolumes/{{volume}}BV.pdf#page={{pdfpage}}";
+
+            const LOC_CUTOFF = 542;
 
             // http://blog.ryangreen.ca/2016/01/04/how-to-http-redirects-with-api-gateway-and-lambda/
             exports.handler = function(event, context) {
@@ -72,7 +76,11 @@ Resources:
                 var page = pad(event['page'], 3);
                 var pdfpage = event['pdfpage'];
 
-                var template = pdfpage ? PAGE_URL_TEMPLATE : URL_TEMPLATE;
+                var template = volume <= LOC_CUTOFF ?
+                    (pdfpage ? LOC_PAGE_URL_TEMPLATE : LOC_URL_TEMPLATE) : SC_URL_TEMPLATE;
+                    
+                // if pdfpage not provided, then shim in regular page for SC links
+                if (!pdfpage) { pdfpage = page; }
 
                 var url = template.replace(/{{volume}}/g, volume).replace(/{{page}}/g, page).replace(/{{pdfpage}}/g, pdfpage);
                 
