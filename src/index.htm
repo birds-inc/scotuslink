@@ -100,20 +100,38 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
 <script>
 new ClipboardJS('.copy');
-$("input").keyup(function(){
-	var t=$("#v").val(),
-	n=$("#p").val(),
-	u=$("#pp").val(),
-	a="https://${url}/"+t+"/"+n;
-	u&&(a+="/"+u),
-	$("#t").html(a),
-	$("#l").attr("href",a)
-}),
+
 $(document).ready(function(){
     $("input:first").focus();
 
+    var firstinput = true;
+
+    // prevent non-number input
+    $("input").keydown(function(e) {
+        // https://css-tricks.com/snippets/javascript/javascript-keycodes/
+        if (e.keyCode === 32 || (e.keyCode >= 65 && e.keyCode <= 90)) { 
+            e.preventDefault();
+        }
+    });
+
 	$("input").keyup(function(e) {
         if (String.fromCharCode(e.keyCode).match(/\d/)) {
+            // clear placeholders
+            if (firstinput) {
+                $("input").removeAttr('placeholder');
+                firstinput = false;
+            }
+
+            // update url
+            var t=$("#v").val(),
+            n=$("#p").val(),
+            u=$("#pp").val(),
+            a="https://${url}/"+t+"/"+n;
+            u&&(a+="/"+u),
+            $("#t").html(a),
+            $("#l").attr("href",a)
+
+            // focus to next input when you reach maxlength
             if(this.value.length==$(this).attr("maxlength")) {
                 var inputs = $("input");
                 inputs.eq(inputs.index(this)+1).focus();
