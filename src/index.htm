@@ -95,7 +95,16 @@
     </div>
 </div>
 
+<div id="about" class="modal" style="overflow: visible;">
+    <p>Supreme Court opinions are published online in PDF format by the <a href="https://www.supremecourt.gov/opinions/boundvolumes.aspx" target="_blank">Supreme Court</a> and the <a href="https://www.loc.gov/collections/united-states-reports/" target="_blank">Library of Congress</a> - but it can be hard to find and link to them.</p>
+    <p>We simplify that - just enter the opinion's Volume and Page, and get a short link directly to the PDF.</p>
+    <p>You can even reference a specific page in the PDF file itself.</p>
+    <p>Feel free to save these links or share them on social media!</p>
+    <p>NOTE: It can take years for PDFs to be made available online.  We'll always try to link you to the best available online resource, but if a particular case is not available, <a href="mailto:scotuslink@gmail.com">let us know!</a></p>
+</div>
+
 <footer>
+    <p> <a href="#about" rel="modal:open">how does this work?</a> </p>
     <p> by <a href="https://twitter.com/orinkerr" target="_blank">@orinkerr</a> and <a href="https://twitter.com/birds_____" target="_blank">@birds_____</a><br/>
 		design by  <a href="mailto:juan@moncada.io" target="_blank">juan@moncada.io</a>
     </p>
@@ -104,6 +113,8 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/jquery.shadow-animation/1/mainfile"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
 <script>
 new ClipboardJS('.copy');
 
@@ -120,6 +131,7 @@ $(document).ready(function(){
         }
     });
 
+    // when entering a digit
 	$("input").keyup(function(e) {
         if (String.fromCharCode(e.keyCode).match(/\d/)) {
             // clear placeholders
