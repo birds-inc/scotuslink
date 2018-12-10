@@ -227,6 +227,8 @@ Resources:
     Properties:
       RestApiId: !Ref RedirectAPI
       StageName: api
+      StageDescription:
+        LoggingLevel: INFO
 
   # dns
   APIDomainName:
