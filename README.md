@@ -4,12 +4,12 @@ Envisioned by [Orin Kerr](https://twitter.com/OrinKerr) to make it easier for la
 
 # The Problem
 
-PDFs are made available online of Supreme Court opinions, but quickly finding the PDF for a given Volume and Page can be challenging.
+PDFs are available online of Supreme Court opinions, but finding a given Volume and Page can be challenging.
 
 PDFs of opinions are available through 2004 (Vol. 542) at the Library of Congress site, indexed by page.
-Newer opinions are available at the SCOTUS site, but only in PDFs spanning the whole volume, so we prefer LOC.
+Newer opinions are available at the SCOTUS site, but only in PDFs spanning the whole volume, so we prefer LoC.
 
-Both sites use consistent URL formats for their PDFs, so this site provides a simple interface for templating in Volume and Page.
+Both sites use consistent URL formats for their PDFs, so this site provides a simple interface for templating in volume and page.
 
 # Design
 
@@ -31,7 +31,7 @@ Thanks also to [Ryan Green](https://github.com/rpgreen) for his [article on impl
 
 # Contributing
 
-Suggestions, contributions, and expertise are welcome!  Please email any suggestions to (scotuslink@gmail.com)[mailto:scotuslink@gmail.com] or contact [me on Twitter](https://twitter.com/birds_____).
+Suggestions, contributions, and expertise are welcome!  Please email any suggestions to [scotuslink@gmail.com](mailto:scotuslink@gmail.com) or contact [me on Twitter](https://twitter.com/birds_____).
 
 SCOTUSLink is released under the [GNU Affero General Public License v3.0](LICENSE.txt), which means you are free to use, copy, modify, share, and distribute this code, as long as any derivate works are also released under this license.
 
