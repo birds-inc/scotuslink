@@ -8,7 +8,7 @@ Parameters:
 
   CertificateArnParameter:
     Type: String
-    Default: arn:aws:acm:us-east-1:758881537981:certificate/dc6174a9-ef18-43b3-8b18-c252284d0891
+    Default: arn:aws:acm:us-east-1:12345:certificate/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
 
   HostedZoneParameter:
     Type: String
