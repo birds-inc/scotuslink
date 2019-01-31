@@ -1,4 +1,4 @@
-# SCOTUSLink - Supreme Court Opinion URL Shortener
+# [SCOTUSLink.com](https://scotuslink.com) - Supreme Court Opinion URL Shortener
 
 Envisioned by [Orin Kerr](https://twitter.com/OrinKerr) to make it easier for lawyers, journalists and citizens to access Supreme Court opinion PDFs.
 
@@ -6,8 +6,8 @@ Envisioned by [Orin Kerr](https://twitter.com/OrinKerr) to make it easier for la
 
 PDFs are available online of Supreme Court opinions, but finding a given Volume and Page can be challenging.
 
-PDFs of opinions are available through 2004 (Vol. 542) at the Library of Congress site, indexed by page.
-Newer opinions are available at the SCOTUS site, but only in PDFs spanning the whole volume, so we prefer LoC.
+Opinions are available through 2004 (Vol. 542) at the Library of Congress site, indexed by page.
+Newer opinions are available at the SCOTUS site, but only in PDFs spanning the whole volume, so we prefer LoC when available.
 
 Both sites use consistent URL formats for their PDFs, so this site provides a simple interface for templating in volume and page.
 
@@ -27,7 +27,7 @@ In this way, we avoid any persisted resources, even images, so hosting costs are
 
 Thanks to [Juan Moncada](https://github.com/juanmoncada) for the visual design, and his clever use of SVG in the logo.
 
-Thanks also to [Ryan Green](https://github.com/rpgreen) for his [article on implementing 302 redirects in API Gateway](http://blog.ryangreen.ca/2016/01/04/how-to-http-redirects-with-api-gateway-and-lambda/), which formed the basis for this approach.
+Thanks also to [Ryan Green](https://github.com/rpgreen) for his [article on implementing 302 redirects in API Gateway](http://blog.ryangreen.ca/2016/01/04/how-to-http-redirects-with-api-gateway-and-lambda/).
 
 # Contributing
 
